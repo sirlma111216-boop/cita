@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>시타델 교실판</title>
+  <meta name="description" content="교사가 클래스를 운영하고 학생들이 여러 게임방에서 함께 플레이하는 한국어 시타델 웹앱">
+  <meta name="theme-color" content="#121829">
+  <link rel="icon" href="/img/emblem_city.webp" type="image/webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Nanum+Myeongjo:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <a class="skip" href="#app">본문으로 건너뛰기</a>
+  <div id="conn" class="conn" role="status" aria-live="polite" hidden></div>
+  <main id="app" tabindex="-1"></main>
+  <div id="modal-root"></div>
+  <div id="toasts" class="toasts" role="alert" aria-live="assertive"></div>
+  <noscript>이 앱을 쓰려면 자바스크립트를 켜야 합니다.</noscript>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

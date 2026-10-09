@@ -1,0 +1,338 @@
+[
+  {
+    "file": "background_class_lobby.png",
+    "width": 1672,
+    "height": 941,
+    "alphaMin": 255,
+    "bytes": 2389306
+  },
+  {
+    "file": "background_entry.png",
+    "width": 1672,
+    "height": 941,
+    "alphaMin": 255,
+    "bytes": 2508942
+  },
+  {
+    "file": "background_game_table.png",
+    "width": 1672,
+    "height": 941,
+    "alphaMin": 255,
+    "bytes": 2905114
+  },
+  {
+    "file": "background_results.png",
+    "width": 1672,
+    "height": 941,
+    "alphaMin": 255,
+    "bytes": 2607779
+  },
+  {
+    "file": "card_back_character.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3365329
+  },
+  {
+    "file": "card_back_district.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3555269
+  },
+  {
+    "file": "character_architect.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2787188
+  },
+  {
+    "file": "character_assassin.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2599671
+  },
+  {
+    "file": "character_bishop.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2901888
+  },
+  {
+    "file": "character_king.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2585410
+  },
+  {
+    "file": "character_magician.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2858651
+  },
+  {
+    "file": "character_merchant.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2615438
+  },
+  {
+    "file": "character_thief.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2728735
+  },
+  {
+    "file": "character_warlord.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2826857
+  },
+  {
+    "file": "district_barracks.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2935643
+  },
+  {
+    "file": "district_castle.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3071570
+  },
+  {
+    "file": "district_cathedral.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3089360
+  },
+  {
+    "file": "district_church.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2850519
+  },
+  {
+    "file": "district_docks.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3047077
+  },
+  {
+    "file": "district_dragon_gate.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3281957
+  },
+  {
+    "file": "district_factory.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3285895
+  },
+  {
+    "file": "district_fortress.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2934128
+  },
+  {
+    "file": "district_harbor.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3175678
+  },
+  {
+    "file": "district_haunted_quarter.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3427434
+  },
+  {
+    "file": "district_imperial_treasury.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2849550
+  },
+  {
+    "file": "district_keep.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2702979
+  },
+  {
+    "file": "district_laboratory.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2847788
+  },
+  {
+    "file": "district_library.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2819316
+  },
+  {
+    "file": "district_manor.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3435055
+  },
+  {
+    "file": "district_map_room.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2786927
+  },
+  {
+    "file": "district_market.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2893732
+  },
+  {
+    "file": "district_monastery.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3288697
+  },
+  {
+    "file": "district_palace.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3168589
+  },
+  {
+    "file": "district_prison.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2990587
+  },
+  {
+    "file": "district_quarry.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3206156
+  },
+  {
+    "file": "district_school_of_magic.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2946223
+  },
+  {
+    "file": "district_smithy.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2808566
+  },
+  {
+    "file": "district_statue.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2993293
+  },
+  {
+    "file": "district_tavern.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3136361
+  },
+  {
+    "file": "district_temple.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3186427
+  },
+  {
+    "file": "district_thieves_den.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2709448
+  },
+  {
+    "file": "district_town_hall.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3280119
+  },
+  {
+    "file": "district_trading_post.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3357074
+  },
+  {
+    "file": "district_watchtower.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 2920021
+  },
+  {
+    "file": "district_wishing_well.png",
+    "width": 1024,
+    "height": 1536,
+    "alphaMin": 255,
+    "bytes": 3171084
+  },
+  {
+    "file": "emblem_city.png",
+    "width": 1254,
+    "height": 1254,
+    "alphaMin": 0,
+    "bytes": 1646066
+  },
+  {
+    "file": "token_crown.png",
+    "width": 1254,
+    "height": 1254,
+    "alphaMin": 0,
+    "bytes": 882424
+  },
+  {
+    "file": "token_gold.png",
+    "width": 1254,
+    "height": 1254,
+    "alphaMin": 0,
+    "bytes": 1256013
+  }
+]

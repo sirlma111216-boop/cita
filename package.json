@@ -1,0 +1,19 @@
+{
+  "name": "cita-classroom-citadels",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "교실용 시타델 웹앱 (Cloudflare Workers + Durable Objects)",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test \"test/*.test.mjs\"",
+    "images": "node scripts/optimize-images.mjs",
+    "hash-password": "node scripts/hash-password.mjs"
+  },
+  "devDependencies": {
+    "sharp": "0.33.5",
+    "wrangler": "4.149.0",
+    "ws": "8.18.0"
+  }
+}

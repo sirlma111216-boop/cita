@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "cita-dev", "runtimeExecutable": "npx", "runtimeArgs": ["wrangler", "dev", "--port", "8790", "--ip", "127.0.0.1"], "port": 8790 }
+  ]
+}
