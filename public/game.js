@@ -422,7 +422,7 @@ function resultsScreen(ctx) {
       h('h1', null, winners.map(w => nim(w.name)).join(', '), ' 승리!'),
       h('p', null, `${winners[0].total}점 · ${g.round}라운드 만에 게임이 끝났습니다.`),
       r.tieNote ? h('p', { class: 'small muted' }, r.tieNote) : null,
-      h('div', { class: 'row', style: { justifyContent: 'center' } }, h('button', { class: 'btn primary big', onclick: onLeave }, '교실 로비로 돌아가기'))),
+      h('div', { class: 'row', style: { justifyContent: 'center' } }, h('button', { class: 'btn primary big', onclick: onLeave }, ctx.leaveLabel || '교실 로비로 돌아가기'))),
     h('section', { class: 'stack' },
       h('h2', null, '순위와 점수 계산'),
       r.rows.map(row => h('article', { class: 'panel result-row' + (row.place === 1 ? ' rank1' : '') },

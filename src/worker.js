@@ -1,5 +1,5 @@
 // 진입점 — 정적 파일은 ASSETS 가, /api 와 /ws 는 이 Worker 가 처리한다.
-import { verifyPassword, signToken, verifyToken, isCode, cleanText } from './auth.js';
+import { verifyPassword, signToken, verifyToken, isCode, cleanText, randomCode } from './auth.js';
 export { Registry } from './registry.js';
 export { ClassRoom } from './classroom.js';
 
@@ -69,6 +69,18 @@ export default {
       await classroom(env, code).fetch('https://c/destroy', { method: 'POST' });
       await registry(env).fetch('https://r/remove', { method: 'POST', body: JSON.stringify({ code }) });
       return json({ ok: true });
+    }
+
+    // 혼자서 하기: 클래스 코드 없이 봇과 바로 한 판 (교사 목록에 등록하지 않는 1인 전용 공간)
+    if (path === '/api/solo' && req.method === 'POST') {
+      const b = await readJson(req);
+      const code = randomCode();
+      const room = classroom(env, code);
+      await room.fetch('https://c/init', { method: 'POST', body: JSON.stringify({ code, name: '혼자서 하기', createdAt: Date.now(), solo: true }) });
+      const r = await room.fetch('https://c/solo-start', { method: 'POST', body: JSON.stringify({ name: b.name, bots: b.bots }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) return err(400, d.error || '혼자서 하기를 시작하지 못했습니다.', d.next || '잠시 뒤 다시 시도하세요.');
+      return json(d);
     }
 
     // 학생 참여 화면: 코드가 맞는지와 클래스 이름만 알려 준다

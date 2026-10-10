@@ -2,7 +2,7 @@
 import { h, clear, toast, store, closeModal, modalOpen } from './dom.js';
 import { Conn } from './net.js';
 import { ASSET_BY_ID } from './shared/assets.js';
-import { MIN_PLAYERS, MAX_PLAYERS } from './shared/data.js';
+import { MIN_PLAYERS, MAX_PLAYERS, nim } from './shared/data.js';
 import { renderRoom, resetRoomUi, actBtn } from './game.js';
 import { openHelp } from './help.js';
 
@@ -102,6 +102,7 @@ function entryScreen() {
           h('form', { class: 'stack', onsubmit: submit },
             h('div', { class: 'field' }, h('label', { for: 'entry-code' }, '선생님이 알려 준 클래스 코드'), codeIn),
             h('button', { class: 'btn primary big', type: 'submit', style: { width: '100%' } }, '참여하기'))),
+        soloPanel(),
         h('section', { class: 'panel stack' }, h('h2', null, '선생님으로 시작'),
           h('p', { class: 'muted' }, '클래스를 만들고, 학생 명단과 방장을 관리하고, 게임방을 엽니다.'),
           h('a', { class: 'btn big', href: '/teacher', 'data-link': '', style: { width: '100%' } }, '교사 로그인'))),
@@ -111,6 +112,37 @@ function entryScreen() {
         h('div', null, h('b', null, '건물 68장'), '기본 54장 + 특수 14장'),
         h('div', null, h('b', null, '끊겨도 괜찮아요'), '다시 들어오면 같은 자리')),
       h('p', { class: 'small', style: { marginTop: '18px' } }, h('button', { class: 'btn small ghost', onclick: () => openHelp() }, '규칙 먼저 읽어 보기'), ' ', motionBtn()))));
+}
+
+// 메인 화면의 혼자서 하기: 클래스 코드 없이 봇과 바로 한 판
+function soloPanel() {
+  const last = store.get('lastSolo');
+  const nameIn = h('input', { class: 'input', id: 'solo-name', maxlength: 12, placeholder: '예: 별빛기사', autocomplete: 'nickname', 'data-keep': 'solo-name', value: store.get('soloName', '') });
+  const sel = h('select', { class: 'input', id: 'solo-bots', 'aria-label': '함께할 봇 수' }, [3, 4, 5, 6].map(n => h('option', { value: n, selected: n === 3 }, `봇 ${n}명 (${n + 1}인 게임)`)));
+  const btn = h('button', { class: 'btn teal big', type: 'submit', style: { width: '100%' } }, '봇과 바로 시작');
+  const submit = async e => {
+    e.preventDefault();
+    btn.disabled = true;
+    try {
+      const name = nameIn.value.trim() || '여행자';
+      store.set('soloName', name);
+      const r = await fetch('/api/solo', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name, bots: Number(sel.value) }) });
+      const d = await r.json();
+      if (!r.ok) { toast(d.error, d.next); return; }
+      store.set('student:' + d.code, d.cred);
+      store.set('lastSolo', { code: d.code, at: Date.now() });
+      go('/c/' + d.code);
+    } catch { toast('서버에 연결하지 못했습니다.', '인터넷 연결을 확인하고 다시 시도하세요.'); }
+    finally { btn.disabled = false; }
+  };
+  const canResume = last && Date.now() - last.at < 23 * 3600e3 && store.get('student:' + last.code);
+  return h('section', { class: 'panel stack' }, h('h2', null, '혼자서 하기'),
+    h('p', { class: 'muted' }, '클래스 코드 없이 봇들과 바로 한 판. 규칙을 익히기에 좋아요.'),
+    h('form', { class: 'stack', onsubmit: submit },
+      h('div', { class: 'field' }, h('label', { for: 'solo-name' }, '내 이름 (선택)'), nameIn),
+      h('div', { class: 'field' }, h('label', { for: 'solo-bots' }, '함께할 봇'), sel),
+      btn),
+    canResume ? h('a', { class: 'btn small', href: '/c/' + last.code, 'data-link': '' }, '하던 혼자 게임 이어하기') : null);
 }
 
 // ── 교사 로그인 ────────────────────────────────────────
@@ -356,9 +388,17 @@ function studentLobby(st) {
     const scene = room.status === 'finished' ? 'background_results' : 'background_game_table';
     return h('div', { class: 'scene dim', style: bg(scene) },
       topbar([h('span', { class: 'badge' }, st.klass.name), h('span', { class: 'small' }, me.name), h('span', { class: 'small muted' }, '· ', room.title)]),
-      renderRoom({ room, conn, me, isTeacher: false, rerender: draw, onLeave: leave }));
+      renderRoom({ room, conn, me, isTeacher: false, rerender: draw, onLeave: leave, leaveLabel: st.klass.solo ? '한 판 더 하기 / 처음으로' : null }));
   }
   S.roomId = null;
+  if (st.klass.solo) {
+    return h('div', { class: 'scene', style: bg('background_class_lobby') },
+      topbar([h('span', { class: 'badge' }, '혼자서 하기')]),
+      h('div', { class: 'wrap stack', style: { maxWidth: '720px' } },
+        h('section', { class: 'panel' }, h('div', { class: 'muted small' }, '혼자서 하기'), h('h1', { style: { fontSize: 'clamp(1.5rem,3vw,2.1rem)', margin: 0 } }, nim(me.name))),
+        practicePanel(conn, '봇 수를 골라 한 판 더 해 보세요. 게임 기록은 24시간 동안 이 기기에서 이어 볼 수 있습니다.'),
+        h('a', { class: 'btn', href: '/', 'data-link': '' }, '처음 화면으로')));
+  }
   const titleIn = h('input', { class: 'input', id: 's-room-title', maxlength: 24, placeholder: '예: 달빛 성곽 1모둠', 'data-keep': 's-room-title' });
   const visible = st.rooms.filter(r => r.status !== 'finished');
   return h('div', { class: 'scene', style: bg('background_class_lobby') },

@@ -10,6 +10,7 @@ import { botAction, isBot, BOT_NAMES } from './bots.js';
 const TEACHER = 'teacher';
 const MAX_STUDENTS = 120;
 const MAX_ROOMS = 40;
+const SOLO_TTL = 24 * 3600e3;
 
 class UserError extends Error {
   constructor(why, next = '') { super(why); this.why = why; this.next = next; }
@@ -38,10 +39,25 @@ export class ClassRoom extends DurableObject {
     if (url.pathname === '/init' && req.method === 'POST') {
       const b = await req.json();
       if (!this.meta) {
-        this.meta = { code: b.code, name: b.name, createdAt: b.createdAt, students: {}, roomSeq: 0 };
+        this.meta = { code: b.code, name: b.name, createdAt: b.createdAt, students: {}, roomSeq: 0, solo: !!b.solo };
         this.saveMeta();
+        // 혼자서 하기 공간은 24시간 뒤 스스로 지운다
+        if (b.solo) this.ctx.storage.setAlarm(Date.now() + SOLO_TTL);
       }
       return Response.json({ ok: true });
+    }
+    if (url.pathname === '/solo-start' && req.method === 'POST') {
+      // 클래스 코드 없이 메인 화면에서 시작하는 혼자서 하기: 학생 1명 + 봇 연습 게임을 한 번에 만든다
+      if (!this.meta || !this.meta.solo || Object.keys(this.meta.students).length) return new Response('bad', { status: 400 });
+      const b = await req.json();
+      const name = cleanText(b.name, 12) || '여행자';
+      const secret = randomId(24);
+      const secretHash = await sha256(secret);
+      const id = 's_' + randomId(9);
+      this.meta.students[id] = { id, name, secretHash, host: false, joinedAt: Date.now() };
+      try { this.startPractice(id, false, b.bots); }
+      catch (e) { return Response.json({ error: e.why, next: e.next }, { status: 400 }); }
+      return Response.json({ code: this.meta.code, cred: { sid: id, secret } });
     }
     if (url.pathname === '/destroy' && req.method === 'POST') {
       for (const w of this.ctx.getWebSockets()) { this.send(w, { type: 'denied', why: '선생님이 이 클래스를 삭제했습니다.', next: '선생님께 새 클래스 코드를 받으세요.', forget: true }); try { w.close(4002, 'deleted'); } catch { } }
@@ -52,7 +68,7 @@ export class ClassRoom extends DurableObject {
       return Response.json({ ok: true });
     }
     if (url.pathname === '/info') {
-      if (!this.meta) return new Response('none', { status: 404 });
+      if (!this.meta || this.meta.solo) return new Response('none', { status: 404 });
       return Response.json({ code: this.meta.code, name: this.meta.name });
     }
     if (req.headers.get('upgrade') === 'websocket') {
@@ -118,6 +134,7 @@ export class ClassRoom extends DurableObject {
       }
       uid = s.id; role = 'student';
     } else if (msg.as === 'join') {
+      if (m.solo) { this.send(ws, { type: 'denied', why: '혼자서 하기 게임에는 다른 사람이 들어올 수 없습니다.', next: '처음 화면에서 [혼자서 하기]로 새 게임을 시작하세요.' }); return; }
       const name = cleanText(msg.name, 12);
       if (!name) { this.send(ws, { type: 'denied', why: '표시 이름을 입력해야 합니다.', next: '1~12자로 이름을 적어 주세요.' }); return; }
       if (Object.keys(m.students).length >= MAX_STUDENTS) { this.send(ws, { type: 'denied', why: '이 클래스의 정원이 가득 찼습니다.', next: '선생님께 알려 주세요.' }); return; }
@@ -188,19 +205,7 @@ export class ClassRoom extends DurableObject {
         return;
       }
       case 'create_practice': { // 혼자 연습: 나 + 봇으로 바로 시작 (다른 학생의 방 목록에는 보이지 않음)
-        if (this.activeRoomOf(uid)) no('이미 다른 게임방에 참가 중입니다.', '지금 방에서 나온 뒤에 연습을 시작하세요.');
-        const nb = Math.round(Number(msg.bots));
-        if (!(nb >= MIN_PLAYERS - 1 && nb <= MAX_PLAYERS - 1)) no(`봇은 ${MIN_PLAYERS - 1}~${MAX_PLAYERS - 1}명까지 고를 수 있습니다.`, '봇 수를 다시 고르세요.');
-        const open = Object.values(this.rooms).filter(r => r.status !== 'finished').length;
-        if (open >= MAX_ROOMS) no('열린 게임방이 너무 많습니다.', '선생님께 끝난 방 정리를 부탁하세요.');
-        m.roomSeq += 1;
-        const myName = isTeacher ? '선생님' : m.students[uid].name;
-        const r = { id: 'r' + m.roomSeq, title: `${myName}의 연습 게임`, host: uid, practice: true, createdAt: Date.now(), status: 'waiting', seats: [uid], names: { [uid]: myName }, game: null };
-        for (let i = 0; i < nb; i++) this.addBot(r);
-        r.game = createGame(r.seats.map(id => ({ id, name: r.names[id] })));
-        r.status = 'playing'; r.startedAt = Date.now();
-        this.rooms[r.id] = r;
-        this.saveRoom(r); this.saveMeta();
+        const r = this.startPractice(uid, isTeacher, msg.bots);
         if (isTeacher) ws.serializeAttachment({ ...att, watch: r.id });
         return;
       }
@@ -286,6 +291,37 @@ export class ClassRoom extends DurableObject {
     }
   }
 
+  startPractice(uid, isTeacher, bots) {
+    const m = this.meta;
+    if (this.activeRoomOf(uid)) no('이미 다른 게임방에 참가 중입니다.', '지금 방에서 나온 뒤에 연습을 시작하세요.');
+    const nb = Math.round(Number(bots));
+    if (!(nb >= MIN_PLAYERS - 1 && nb <= MAX_PLAYERS - 1)) no(`봇은 ${MIN_PLAYERS - 1}~${MAX_PLAYERS - 1}명까지 고를 수 있습니다.`, '봇 수를 다시 고르세요.');
+    const open = Object.values(this.rooms).filter(r => r.status !== 'finished').length;
+    if (open >= MAX_ROOMS) no('열린 게임방이 너무 많습니다.', '선생님께 끝난 방 정리를 부탁하세요.');
+    // 혼자서 하기 공간은 끝난 방을 하나만 남겨 둔다
+    if (m.solo) for (const r of Object.values(this.rooms)) if (r.status === 'finished') { delete this.rooms[r.id]; this.ctx.storage.delete('room:' + r.id); }
+    m.roomSeq += 1;
+    const myName = isTeacher ? '선생님' : m.students[uid].name;
+    const r = { id: 'r' + m.roomSeq, title: m.solo ? '혼자서 하기' : `${myName}의 연습 게임`, host: uid, practice: true, createdAt: Date.now(), status: 'waiting', seats: [uid], names: { [uid]: myName }, game: null };
+    for (let i = 0; i < nb; i++) this.addBot(r);
+    r.game = createGame(r.seats.map(id => ({ id, name: r.names[id] })));
+    r.status = 'playing'; r.startedAt = Date.now();
+    this.rooms[r.id] = r;
+    this.saveRoom(r); this.saveMeta();
+    if (m.solo) this.ctx.storage.setAlarm(Date.now() + SOLO_TTL);
+    this.kickBots();
+    return r;
+  }
+
+  async alarm() {
+    if (!this.meta || !this.meta.solo) return;
+    for (const w of this.ctx.getWebSockets()) { try { w.close(4003, 'expired'); } catch { } }
+    for (const t of Object.values(this.botTimers)) clearTimeout(t);
+    this.botTimers = {};
+    await this.ctx.storage.deleteAll();
+    this.meta = null; this.rooms = {};
+  }
+
   addBot(r) {
     let k = 1;
     while (r.seats.includes('bot_' + k)) k++;
@@ -369,7 +405,7 @@ export class ClassRoom extends DurableObject {
     const isTeacher = att.role === 'teacher';
     const rooms = Object.values(this.rooms).sort((a, b) => b.createdAt - a.createdAt);
     const out = {
-      klass: { code: m.code, name: m.name },
+      klass: { code: m.code, name: m.name, solo: !!m.solo },
       me: isTeacher ? { id: TEACHER, name: '선생님', role: 'teacher' } : { id: uid, name: m.students[uid]?.name, role: 'student', host: !!m.students[uid]?.host },
       // 연습 게임은 본인과 선생님에게만 보인다
       rooms: rooms.filter(r => isTeacher || !r.practice || r.seats.includes(uid)).map(r => this.roomSummary(r, online)),
