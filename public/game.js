@@ -114,7 +114,7 @@ function playerPanel(ctx, p) {
       g.crown === p.id ? icon('token_crown', 'crown', '왕관 보유자') : null,
       p.role ? h('span', { class: 'rolepill' }, `${ROLE_BY_ID[p.role].rank} ${roleName(p.role)}`) : null,
       g.phase === 'selection' ? h('span', { class: 'small muted' }, p.picked ? '역할 고름' : '') : null,
-      room.host === p.id ? h('span', { class: 'badge host', title: '선생님이 지정한 게임방 관리자 (왕관과 다릅니다)' }, '방장') : null),
+      room.host === p.id && !room.practice ? h('span', { class: 'badge host', title: '선생님이 지정한 게임방 관리자 (왕관과 다릅니다)' }, '방장') : null),
     h('div', { class: 'pl-stats' },
       h('span', { class: 'stat' }, icon('token_gold', '', '금화'), `금화 ${p.gold}`),
       h('span', { class: 'stat' }, '🂠 손패 ', p.handCount, '장'),
